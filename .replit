@@ -1,0 +1,52 @@
+modules = ["nodejs-20"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Unity AR Translator"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "unity_editor"
+
+[[workflows.workflow]]
+name = "Unity AR Translator"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "unity-editor -projectPath . -batchmode -executeMethod BuildAndRun.BuildForWeb"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "unity_editor"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "unity -projectPath ."
+
+[deployment]
+run = ["sh", "-c", "unity-editor -projectPath . -batchmode -executeMethod BuildAndRun.BuildForWeb"]
