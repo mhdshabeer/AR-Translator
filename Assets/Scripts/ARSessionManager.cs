@@ -39,9 +39,17 @@ public class ARSessionManager : MonoBehaviour
 
     private void CheckARSupport()
     {
-        // Check if AR is supported on the device
-        if (ARSession.state == ARSessionState.None || 
-            ARSession.state == ARSessionState.CheckingAvailability)
+        // For webcam mode, skip AR check and just use camera
+        if (!Application.isMobilePlatform)
+        {
+            WebCamTexture webcamTexture = new WebCamTexture();
+            webcamTexture.Play();
+            // Assign webcam texture to camera background
+            GetComponent<Camera>().targetTexture = null;
+            StartARSession();
+        }
+        else if (ARSession.state == ARSessionState.None || 
+                 ARSession.state == ARSessionState.CheckingAvailability)
         {
             StartCoroutine(CheckAvailability());
         }
