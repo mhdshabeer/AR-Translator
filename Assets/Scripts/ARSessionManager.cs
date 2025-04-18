@@ -42,10 +42,36 @@ public class ARSessionManager : MonoBehaviour
         // For webcam mode, skip AR check and just use camera
         if (!Application.isMobilePlatform)
         {
-            WebCamTexture webcamTexture = new WebCamTexture();
+            Debug.Log("Desktop platform detected, initializing webcam...");
+            
+            // Get available webcam devices
+            WebCamDevice[] devices = WebCamTexture.devices;
+            if (devices.Length == 0)
+            {
+                Debug.LogError("No webcam found!");
+                UIManager.Instance.ShowErrorMessage("No webcam detected. Please ensure a camera is connected.");
+                return;
+            }
+
+            // Use the first available webcam
+            WebCamTexture webcamTexture = new WebCamTexture(devices[0].name, 1280, 720, 30);
             webcamTexture.Play();
-            // Assign webcam texture to camera background
-            GetComponent<Camera>().targetTexture = null;
+
+            // Wait for webcam to start
+            while (!webcamTexture.isPlaying && !webcamTexture.didUpdateThisFrame)
+            {
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            // Create a Raw Image component to display webcam feed
+            var rawImage = GetComponent<UnityEngine.UI.RawImage>();
+            if (rawImage == null)
+            {
+                rawImage = gameObject.AddComponent<UnityEngine.UI.RawImage>();
+            }
+            rawImage.texture = webcamTexture;
+            
+            Debug.Log("Webcam initialized successfully");
             StartARSession();
         }
         else if (ARSession.state == ARSessionState.None || 
